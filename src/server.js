@@ -5,18 +5,24 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+const origin = process.env.CORS_ORIGIN;
+
+// CORS options
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
 
 // Middleware
-app.use(cors({
-  "origin": "*"
-}));
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // Importar rutas
 const interconsultaRoutes = require('./routes/interconsultaRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
 
 // Usar rutas
 app.use('/api/interconsultas', interconsultaRoutes);
@@ -37,6 +43,9 @@ app.listen(PORT, () => {
 
 // Manejo de errores global
 app.use((err, req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN);
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   console.error(err.stack);
   res.status(500).json({
     exito: false,
@@ -47,6 +56,9 @@ app.use((err, req, res, next) => {
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
+  res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN);
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   res.status(404).json({
     exito: false,
     error: 'Ruta no encontrada'
