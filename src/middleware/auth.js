@@ -1,18 +1,15 @@
-const jwt = require('jsonwebtoken');
-const Usuario = require('../models/Usuario');
+const jwt = require("jsonwebtoken");
+const Usuario = require("../models/Usuario");
 
 const protegerRuta = async (req, res, next) => {
   try {
     // 1. Verificar si existe el token
-    let token;
-    if (req.headers.authorization?.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
+    const token = req.headers.authorization.split("Bearer ")[1];
 
     if (!token) {
       return res.status(401).json({
         exito: false,
-        error: 'No está autorizado para acceder a este recurso'
+        error: "No está autorizado para acceder a este recurso",
       });
     }
 
@@ -20,11 +17,11 @@ const protegerRuta = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 3. Verificar si el usuario aún existe y está activo
-    const usuario = await Usuario.findById(decoded.id).populate('servicio');
+    const usuario = await Usuario.findById(decoded.id).populate("servicio");
     if (!usuario || !usuario.activo) {
       return res.status(401).json({
         exito: false,
-        error: 'El usuario no existe o está desactivado'
+        error: "El usuario no existe o está desactivado",
       });
     }
 
@@ -32,10 +29,10 @@ const protegerRuta = async (req, res, next) => {
     req.usuario = usuario;
     next();
   } catch (error) {
-    console.error('Error de autenticación:', error);
+    console.error("Error de autenticación:", error);
     res.status(401).json({
       exito: false,
-      error: 'Token inválido o expirado'
+      error: "Token inválido o expirado",
     });
   }
 };
@@ -45,7 +42,7 @@ const restringirA = (...roles) => {
     if (!roles.includes(req.usuario.rol)) {
       return res.status(403).json({
         exito: false,
-        error: 'No tiene permisos para realizar esta acción'
+        error: "No tiene permisos para realizar esta acción",
       });
     }
     next();
